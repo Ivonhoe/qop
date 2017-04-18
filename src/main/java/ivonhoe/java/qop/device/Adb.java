@@ -2,6 +2,7 @@ package ivonhoe.java.qop.device;
 
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.IDevice;
+import ivonhoe.java.qop.utils.Logger;
 
 import java.io.File;
 
@@ -79,5 +80,17 @@ public class Adb {
         }
 
         return null;
+    }
+
+    public static String install(String serial, String path) {
+        String command = "adb -s " + serial + " install " + path;
+
+        return ShellCommand.exec(command);
+    }
+
+    public static String shell(String serial, String command) {
+        command = "adb -s " + serial + " shell " + command;
+
+        return ShellCommand.exec(command);
     }
 }

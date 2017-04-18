@@ -67,7 +67,6 @@ public class RecordPanel extends JPanel implements Controller.RecordStatusListen
         stopLabel2.setBounds(0, 0, iconStopDisable.getIconWidth(), iconStopDisable.getIconHeight());
         stopLabel2.addMouseListener(mStopRecordListener);
 
-
         iconReplayEnable = new ImageIcon("./res/play_enabled.png");
         iconReplayDisable = new ImageIcon("./res/play_disabled.png");
         iconReplayDown = new ImageIcon("./res/play_enabled_down.png");

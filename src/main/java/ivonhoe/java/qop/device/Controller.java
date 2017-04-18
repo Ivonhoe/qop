@@ -4,6 +4,7 @@ import com.android.ddmlib.IDevice;
 import ivonhoe.java.qop.minicomponent.MiniCap;
 import ivonhoe.java.qop.minicomponent.MiniComponent;
 import ivonhoe.java.qop.minicomponent.MiniTouch;
+import ivonhoe.java.qop.minicomponent.StfAgent;
 import ivonhoe.java.qop.record.Recorder;
 import ivonhoe.java.qop.replay.Replay;
 import ivonhoe.java.qop.utils.Logger;
@@ -23,6 +24,8 @@ import static ivonhoe.java.qop.device.Controller.ReplayStatus.*;
  */
 public class Controller implements Replay.ReplayExecuteListener {
 
+    private static final String KEY_COMMAND = "key ";
+
     private Device mDevice;
 
     private Recorder mRecorder;
@@ -33,12 +36,14 @@ public class Controller implements Replay.ReplayExecuteListener {
 
     private Replay mReplay;
 
+    private StfAgent mStfAgent;
+
     private boolean isRecording;
 
     private ReplayStatus replayStatus = STOP;
 
     public enum ReplayStatus {
-        START, PAUSE, RESTART, STOP
+        START, PAUSE, STOP
     }
 
     private List<RecordStatusListener> mRecordListenerList = new ArrayList<>();
@@ -60,6 +65,8 @@ public class Controller implements Replay.ReplayExecuteListener {
         mRecorder = new Recorder();
         mReplay = new Replay();
         mReplay.setReplayListener(this);
+
+        mStfAgent = new StfAgent(mDevice);
     }
 
     public Device getDevice() {
@@ -191,12 +198,48 @@ public class Controller implements Replay.ReplayExecuteListener {
 
     @Override
     public void onReplayExecute(String command) {
-        executeTouch(command);
+        if (command.startsWith(KEY_COMMAND)) {
+            int keycode = Integer.valueOf(command.replace(KEY_COMMAND, "").replace("\n", ""));
+            mStfAgent.onKeyEvent(keycode);
+        } else {
+            executeTouch(command);
+        }
     }
 
     @Override
     public void onReplayDone(String filePath) {
         setReplaying(STOP);
+    }
+
+    public void executorBackEvent() {
+        mStfAgent.backEvent();
+
+        recordKeyEvent(KeyCode.KEYCODE_BACK);
+    }
+
+    public void executorHomeEvent() {
+        mStfAgent.homeEvent();
+
+        recordKeyEvent(KeyCode.KEYCODE_HOME);
+    }
+
+    public void executorMenuEvent() {
+        mStfAgent.menuEvent();
+
+        recordKeyEvent(KeyCode.KEYCODE_MENU);
+    }
+
+    public void executorPowerEvent() {
+        mStfAgent.onKeyEvent(KeyCode.KEYCODE_POWER);
+
+        recordKeyEvent(KeyCode.KEYCODE_POWER);
+    }
+
+    private void recordKeyEvent(int keyCode) {
+        if (isRecording) {
+            String command = KEY_COMMAND + keyCode + "\n";
+            mRecorder.append(command);
+        }
     }
 
     public interface RecordStatusListener {
