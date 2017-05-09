@@ -1,0 +1,26 @@
+group 'ivonhoe.java.analyzer'
+version '0.0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply from: '../release-as-jar.gradle'
+
+jar {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    // 指定jar签名文件里的main函数
+    manifest {
+        attributes("Main-Class": "ivonhoe.java.loganalyzer.Main")
+    }
+}

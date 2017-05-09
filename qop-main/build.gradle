@@ -1,0 +1,35 @@
+group 'ivonhoe.java.qop'
+version '0.0.1'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile project(':bitmap-analyzer')
+    compile project(':log-analyzer')
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+apply from: '../release-as-jar.gradle'
+
+jar {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    // 指定jar签名文件里的main函数
+    manifest {
+        attributes("Main-Class": "ivonhoe.java.qop.gui.QopFrameLayout")
+    }
+}
+
+task runApp(type: Exec, dependsOn: build) {
+    executable "sh"
+    args "-c", "/Users/Ivonhoe/Workspace/qop/qop-main/hprof.sh"
+}
